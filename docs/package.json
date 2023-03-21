@@ -1,12 +1,12 @@
 {
-  "name": "zitadel-docs",
+  "name": "docs",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "start:api": "yarn generate && docusaurus start",
-    "build": "yarn generate && docusaurus build --no-minify",
+    "start:api": "docusaurus start",
+    "build": "docusaurus build --no-minify",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",

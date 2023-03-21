@@ -1,0 +1,30 @@
+VERSION 0.7
+FROM node:18-alpine
+
+WORKDIR /app
+
+deps:
+    COPY package.json package-lock.json ./
+    RUN npm ci
+    COPY buf.gen.yaml .
+    COPY ../proto+copy/* ../proto/
+    RUN npm run generate
+    SAVE ARTIFACT src/app/proto/generated AS LOCAL src/app/proto/generated
+
+lint:
+    FROM +deps
+    COPY . .
+    RUN npm run lint
+
+build:
+    FROM +deps
+    COPY . .
+    RUN npm run build
+    SAVE ARTIFACT dist /dist AS LOCAL dist
+
+docker:
+    FROM +deps
+    COPY +build/dist ./dist
+    EXPOSE 8080
+    ENTRYPOINT ["/js-example/node_modules/http-server/bin/http-server", "./dist"]
+    SAVE IMAGE --push earthly/examples:js

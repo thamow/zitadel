@@ -1,0 +1,7 @@
+VERSION 0.7
+FROM alpine:3
+
+copy:
+    COPY buf.lock buf.yaml proto/
+    COPY zitadel/* proto/zitadel/
+    SAVE ARTIFACT proto

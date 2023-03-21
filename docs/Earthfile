@@ -1,0 +1,26 @@
+VERSION 0.7
+FROM node:18-alpine
+
+WORKDIR /app
+
+deps:
+    COPY package.json yarn.lock ./
+    RUN yarn install --frozen-lockfile
+    COPY buf.gen.yaml .
+    COPY ../proto+copy/* ../proto/
+    RUN yarn generate:grpc
+    
+build:
+    FROM +deps
+    COPY . .
+    RUN yarn generate:apidocs
+    SAVE ARTIFACT .artifacts/openapi AS LOCAL .artifacts/openapi
+    RUN yarn build
+    SAVE ARTIFACT build AS LOCAL build
+
+docker:
+    FROM +deps
+    COPY +build/dist ./dist
+    EXPOSE 8080
+    ENTRYPOINT ["/js-example/node_modules/http-server/bin/http-server", "./dist"]
+    SAVE IMAGE --push earthly/examples:js
