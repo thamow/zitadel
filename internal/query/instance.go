@@ -8,7 +8,6 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/patrickmn/go-cache"
 	"golang.org/x/text/language"
 
 	"github.com/zitadel/zitadel/internal/api/authz"
@@ -189,12 +188,6 @@ func (q *Queries) Instance(ctx context.Context, shouldTriggerBulk bool) (instanc
 		return nil, errors.ThrowInternal(err, "QUERY-d9ngs", "Errors.Query.SQLStatement")
 	}
 
-	if i, ok := q.instanceCache.Get(query); ok {
-		instance = i.(*Instance)
-		instance.host = authz.GetInstance(ctx).RequestedDomain()
-		return instance, nil
-	}
-
 	if shouldTriggerBulk {
 		ctx = projection.InstanceProjection.Trigger(ctx)
 	}
@@ -202,9 +195,6 @@ func (q *Queries) Instance(ctx context.Context, shouldTriggerBulk bool) (instanc
 		instance, err = scan(rows)
 		return err
 	}, query, args...)
-	if err == nil {
-		q.instanceCache.Set(query, instance, cache.DefaultExpiration)
-	}
 	return instance, err
 }
 
@@ -222,20 +212,10 @@ func (q *Queries) InstanceByHost(ctx context.Context, host string) (instance aut
 		return nil, errors.ThrowInternal(err, "QUERY-SAfg2", "Errors.Query.SQLStatement")
 	}
 
-	instance = new(Instance)
-	if i, ok := q.instanceCache.Get(query); ok {
-		instance := i.(*Instance)
-		instance.host = host
-		return instance, nil
-	}
-
 	err = q.client.QueryContext(ctx, func(rows *sql.Rows) error {
 		instance, err = scan(rows)
 		return err
 	}, query, args...)
-	if err == nil {
-		q.instanceCache.Set(query, instance.(*Instance), cache.DefaultExpiration)
-	}
 	return instance, err
 }
 

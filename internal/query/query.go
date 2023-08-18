@@ -50,7 +50,7 @@ type Queries struct {
 	zitadelRoles                        []authz.RoleMapping
 	multifactors                        domain.MultifactorConfigs
 
-	instanceCache *cache.Cache
+	userCache *cache.Cache
 }
 
 func StartQueries(
@@ -84,7 +84,7 @@ func StartQueries(
 		NotificationTranslationFileContents: make(map[string][]byte),
 		zitadelRoles:                        zitadelRoles,
 		sessionTokenVerifier:                sessionTokenVerifier,
-		instanceCache:                       cache.New(time.Minute, 2*time.Minute),
+		userCache:                           cache.New(time.Minute, 2*time.Minute),
 	}
 	iam_repo.RegisterEventMappers(repo.eventstore)
 	usr_repo.RegisterEventMappers(repo.eventstore)

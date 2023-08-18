@@ -8,6 +8,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/text/language"
 
 	"github.com/zitadel/zitadel/internal/api/authz"
@@ -337,11 +338,6 @@ func (q *Queries) GetUserByID(ctx context.Context, shouldTriggerBulk bool, userI
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
 
-	if shouldTriggerBulk {
-		ctx = projection.UserProjection.Trigger(ctx)
-		ctx = projection.LoginNameProjection.Trigger(ctx)
-	}
-
 	query, scan := prepareUserQuery(ctx, q.client)
 	for _, q := range queries {
 		query = q.toQuery(query)
@@ -358,21 +354,28 @@ func (q *Queries) GetUserByID(ctx context.Context, shouldTriggerBulk bool, userI
 		return nil, errors.ThrowInternal(err, "QUERY-FBg21", "Errors.Query.SQLStatment")
 	}
 
+	if user, ok := q.userCache.Get(stmt); ok {
+		return user.(*User), nil
+	}
+
+	if shouldTriggerBulk {
+		ctx = projection.UserProjection.Trigger(ctx)
+		ctx = projection.LoginNameProjection.Trigger(ctx)
+	}
+
 	err = q.client.QueryRowContext(ctx, func(row *sql.Row) error {
 		user, err = scan(row)
 		return err
 	}, stmt, args...)
+	if err == nil {
+		q.userCache.Set(stmt, user, cache.DefaultExpiration)
+	}
 	return user, err
 }
 
 func (q *Queries) GetUser(ctx context.Context, shouldTriggerBulk bool, withOwnerRemoved bool, queries ...SearchQuery) (user *User, err error) {
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
-
-	if shouldTriggerBulk {
-		ctx = projection.UserProjection.Trigger(ctx)
-		ctx = projection.LoginNameProjection.Trigger(ctx)
-	}
 
 	query, scan := prepareUserQuery(ctx, q.client)
 	for _, q := range queries {
@@ -389,10 +392,22 @@ func (q *Queries) GetUser(ctx context.Context, shouldTriggerBulk bool, withOwner
 		return nil, errors.ThrowInternal(err, "QUERY-Dnhr2", "Errors.Query.SQLStatment")
 	}
 
+	if user, ok := q.userCache.Get(stmt); ok {
+		return user.(*User), nil
+	}
+
+	if shouldTriggerBulk {
+		ctx = projection.UserProjection.Trigger(ctx)
+		ctx = projection.LoginNameProjection.Trigger(ctx)
+	}
+
 	err = q.client.QueryRowContext(ctx, func(row *sql.Row) error {
 		user, err = scan(row)
 		return err
 	}, stmt, args...)
+	if err == nil {
+		q.userCache.Set(stmt, user, cache.DefaultExpiration)
+	}
 	return user, err
 }
 
