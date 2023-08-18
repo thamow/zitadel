@@ -181,18 +181,6 @@ func (q *Queries) Instance(ctx context.Context, shouldTriggerBulk bool) (instanc
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
 
-	if i, ok := q.instanceCache.Get(authz.GetInstance(ctx).InstanceID()); ok {
-		instance = i.(*Instance)
-		if instance.host == "" {
-			instance.host = authz.GetInstance(ctx).RequestedDomain()
-		}
-		return instance, nil
-	}
-
-	if shouldTriggerBulk {
-		ctx = projection.InstanceProjection.Trigger(ctx)
-	}
-
 	stmt, scan := prepareInstanceDomainQuery(ctx, q.client, authz.GetInstance(ctx).RequestedDomain())
 	query, args, err := stmt.Where(sq.Eq{
 		InstanceColumnID.identifier(): authz.GetInstance(ctx).InstanceID(),
@@ -201,12 +189,21 @@ func (q *Queries) Instance(ctx context.Context, shouldTriggerBulk bool) (instanc
 		return nil, errors.ThrowInternal(err, "QUERY-d9ngs", "Errors.Query.SQLStatement")
 	}
 
+	if i, ok := q.instanceCache.Get(query); ok {
+		instance = i.(*Instance)
+		instance.host = authz.GetInstance(ctx).RequestedDomain()
+		return instance, nil
+	}
+
+	if shouldTriggerBulk {
+		ctx = projection.InstanceProjection.Trigger(ctx)
+	}
 	err = q.client.QueryContext(ctx, func(rows *sql.Rows) error {
 		instance, err = scan(rows)
 		return err
 	}, query, args...)
 	if err == nil {
-		q.instanceCache.Set(authz.GetInstance(ctx).InstanceID(), instance, cache.DefaultExpiration)
+		q.instanceCache.Set(query, instance, cache.DefaultExpiration)
 	}
 	return instance, err
 }
@@ -216,14 +213,6 @@ func (q *Queries) InstanceByHost(ctx context.Context, host string) (instance aut
 	defer func() { span.EndWithError(err) }()
 
 	host = strings.Split(host, ":")[0] //remove possible port
-	instance = new(Instance)
-	if i, ok := q.instanceCache.Get(authz.GetInstance(ctx).InstanceID()); ok {
-		instance := i.(*Instance)
-		if instance.host == "" {
-			instance.host = host
-		}
-		return instance, nil
-	}
 
 	stmt, scan := prepareAuthzInstanceQuery(ctx, q.client, host)
 	query, args, err := stmt.Where(sq.Eq{
@@ -233,12 +222,19 @@ func (q *Queries) InstanceByHost(ctx context.Context, host string) (instance aut
 		return nil, errors.ThrowInternal(err, "QUERY-SAfg2", "Errors.Query.SQLStatement")
 	}
 
+	instance = new(Instance)
+	if i, ok := q.instanceCache.Get(query); ok {
+		instance := i.(*Instance)
+		instance.host = host
+		return instance, nil
+	}
+
 	err = q.client.QueryContext(ctx, func(rows *sql.Rows) error {
 		instance, err = scan(rows)
 		return err
 	}, query, args...)
 	if err == nil {
-		q.instanceCache.Set(authz.GetInstance(ctx).InstanceID(), instance, cache.DefaultExpiration)
+		q.instanceCache.Set(query, instance.(*Instance), cache.DefaultExpiration)
 	}
 	return instance, err
 }
