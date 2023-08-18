@@ -84,7 +84,7 @@ func StartQueries(
 		NotificationTranslationFileContents: make(map[string][]byte),
 		zitadelRoles:                        zitadelRoles,
 		sessionTokenVerifier:                sessionTokenVerifier,
-		userCache:                           cache.New(time.Minute, 2*time.Minute),
+		userCache:                           cache.New(time.Second, 2*time.Second),
 	}
 	iam_repo.RegisterEventMappers(repo.eventstore)
 	usr_repo.RegisterEventMappers(repo.eventstore)
