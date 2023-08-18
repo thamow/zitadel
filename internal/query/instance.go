@@ -8,6 +8,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/text/language"
 
 	"github.com/zitadel/zitadel/internal/api/authz"
@@ -180,6 +181,14 @@ func (q *Queries) Instance(ctx context.Context, shouldTriggerBulk bool) (instanc
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
 
+	if i, ok := q.instanceCache.Get(authz.GetInstance(ctx).InstanceID()); ok {
+		instance = i.(*Instance)
+		if instance.host == "" {
+			instance.host = authz.GetInstance(ctx).RequestedDomain()
+		}
+		return instance, nil
+	}
+
 	if shouldTriggerBulk {
 		ctx = projection.InstanceProjection.Trigger(ctx)
 	}
@@ -196,6 +205,9 @@ func (q *Queries) Instance(ctx context.Context, shouldTriggerBulk bool) (instanc
 		instance, err = scan(rows)
 		return err
 	}, query, args...)
+	if err == nil {
+		q.instanceCache.Set(authz.GetInstance(ctx).InstanceID(), instance, cache.DefaultExpiration)
+	}
 	return instance, err
 }
 
@@ -203,8 +215,17 @@ func (q *Queries) InstanceByHost(ctx context.Context, host string) (instance aut
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
 
-	stmt, scan := prepareAuthzInstanceQuery(ctx, q.client, host)
 	host = strings.Split(host, ":")[0] //remove possible port
+	instance = new(Instance)
+	if i, ok := q.instanceCache.Get(authz.GetInstance(ctx).InstanceID()); ok {
+		instance := i.(*Instance)
+		if instance.host == "" {
+			instance.host = host
+		}
+		return instance, nil
+	}
+
+	stmt, scan := prepareAuthzInstanceQuery(ctx, q.client, host)
 	query, args, err := stmt.Where(sq.Eq{
 		InstanceDomainDomainCol.identifier(): host,
 	}).ToSql()
@@ -216,6 +237,9 @@ func (q *Queries) InstanceByHost(ctx context.Context, host string) (instance aut
 		instance, err = scan(rows)
 		return err
 	}, query, args...)
+	if err == nil {
+		q.instanceCache.Set(authz.GetInstance(ctx).InstanceID(), instance, cache.DefaultExpiration)
+	}
 	return instance, err
 }
 

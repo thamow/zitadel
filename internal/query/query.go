@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	cache "github.com/patrickmn/go-cache"
 	"github.com/rakyll/statik/fs"
 	"golang.org/x/text/language"
 
@@ -48,6 +49,8 @@ type Queries struct {
 	supportedLangs                      []language.Tag
 	zitadelRoles                        []authz.RoleMapping
 	multifactors                        domain.MultifactorConfigs
+
+	instanceCache *cache.Cache
 }
 
 func StartQueries(
@@ -81,6 +84,7 @@ func StartQueries(
 		NotificationTranslationFileContents: make(map[string][]byte),
 		zitadelRoles:                        zitadelRoles,
 		sessionTokenVerifier:                sessionTokenVerifier,
+		instanceCache:                       cache.New(time.Minute, 2*time.Minute),
 	}
 	iam_repo.RegisterEventMappers(repo.eventstore)
 	usr_repo.RegisterEventMappers(repo.eventstore)
