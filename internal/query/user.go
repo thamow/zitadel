@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	errs "errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -354,7 +355,8 @@ func (q *Queries) GetUserByID(ctx context.Context, shouldTriggerBulk bool, userI
 		return nil, errors.ThrowInternal(err, "QUERY-FBg21", "Errors.Query.SQLStatment")
 	}
 
-	if user, ok := q.userCache.Get(stmt); ok {
+	cacheKey := fmt.Sprint(append([]any{stmt}, args...))
+	if user, ok := q.userCache.Get(cacheKey); ok {
 		return user.(*User), nil
 	}
 
@@ -368,7 +370,7 @@ func (q *Queries) GetUserByID(ctx context.Context, shouldTriggerBulk bool, userI
 		return err
 	}, stmt, args...)
 	if err == nil {
-		q.userCache.Set(stmt, user, cache.DefaultExpiration)
+		q.userCache.Set(cacheKey, user, cache.DefaultExpiration)
 	}
 	return user, err
 }
@@ -392,7 +394,8 @@ func (q *Queries) GetUser(ctx context.Context, shouldTriggerBulk bool, withOwner
 		return nil, errors.ThrowInternal(err, "QUERY-Dnhr2", "Errors.Query.SQLStatment")
 	}
 
-	if user, ok := q.userCache.Get(stmt); ok {
+	cacheKey := fmt.Sprint(append([]any{stmt}, args...))
+	if user, ok := q.userCache.Get(cacheKey); ok {
 		return user.(*User), nil
 	}
 
@@ -406,7 +409,7 @@ func (q *Queries) GetUser(ctx context.Context, shouldTriggerBulk bool, withOwner
 		return err
 	}, stmt, args...)
 	if err == nil {
-		q.userCache.Set(stmt, user, cache.DefaultExpiration)
+		q.userCache.Set(cacheKey, user, cache.DefaultExpiration)
 	}
 	return user, err
 }
