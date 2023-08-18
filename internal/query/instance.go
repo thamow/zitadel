@@ -202,9 +202,8 @@ func (q *Queries) InstanceByHost(ctx context.Context, host string) (instance aut
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
 
-	host = strings.Split(host, ":")[0] //remove possible port
-
 	stmt, scan := prepareAuthzInstanceQuery(ctx, q.client, host)
+	host = strings.Split(host, ":")[0] //remove possible port
 	query, args, err := stmt.Where(sq.Eq{
 		InstanceDomainDomainCol.identifier(): host,
 	}).ToSql()
