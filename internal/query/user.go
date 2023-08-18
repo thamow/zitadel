@@ -356,9 +356,9 @@ func (q *Queries) GetUserByID(ctx context.Context, shouldTriggerBulk bool, userI
 	}
 
 	cacheKey := fmt.Sprint(append([]any{stmt}, args...))
-	// if user, ok := q.userCache.Get(cacheKey); ok {
-	// 	return user.(*User), nil
-	// }
+	if user, ok := q.userCache.Get(cacheKey); ok {
+		return user.(*User), nil
+	}
 
 	if shouldTriggerBulk {
 		ctx = projection.UserProjection.Trigger(ctx)
@@ -395,9 +395,9 @@ func (q *Queries) GetUser(ctx context.Context, shouldTriggerBulk bool, withOwner
 	}
 
 	cacheKey := fmt.Sprint(append([]any{stmt}, args...))
-	// if user, ok := q.userCache.Get(cacheKey); ok {
-	// 	return user.(*User), nil
-	// }
+	if user, ok := q.userCache.Get(cacheKey); ok {
+		return user.(*User), nil
+	}
 
 	if shouldTriggerBulk {
 		ctx = projection.UserProjection.Trigger(ctx)
