@@ -15,12 +15,23 @@ func _() {
 	_ = x[ApplicationCreated-4]
 	_ = x[AuthenticationSucceededOnApplication-5]
 	_ = x[InstanceDeleted-6]
-	_ = x[typesCount-7]
+	_ = x[CustomInstanceDomainConfigured-7]
+	_ = x[IDPCreated-8]
+	_ = x[IDPActivated-9]
+	_ = x[IDPLinked-10]
+	_ = x[IDPSignIn-11]
+	_ = x[BrandingConfigured-12]
+	_ = x[BrandingActivated-13]
+	_ = x[SMTPConfigured-14]
+	_ = x[B2BOrgCreated-15]
+	_ = x[B2BProjectGranted-16]
+	_ = x[B2BUserGranted-17]
+	_ = x[typesCount-18]
 }
 
-const _Type_name = "unknownInstanceCreatedAuthenticationSucceededOnInstanceProjectCreatedApplicationCreatedAuthenticationSucceededOnApplicationInstanceDeletedtypesCount"
+const _Type_name = "unknownInstanceCreatedAuthenticationSucceededOnInstanceProjectCreatedApplicationCreatedAuthenticationSucceededOnApplicationInstanceDeletedCustomInstanceDomainConfiguredIDPCreatedIDPActivatedIDPLinkedIDPSignInBrandingConfiguredBrandingActivatedSMTPConfiguredB2BOrgCreatedB2BProjectGrantedB2BUserGrantedtypesCount"
 
-var _Type_index = [...]uint8{0, 7, 22, 55, 69, 87, 123, 138, 148}
+var _Type_index = [...]uint16{0, 7, 22, 55, 69, 87, 123, 138, 168, 178, 190, 199, 208, 226, 243, 257, 270, 287, 301, 311}
 
 func (i Type) String() string {
 	if i < 0 || i >= Type(len(_Type_index)-1) {

@@ -18,6 +18,21 @@ const (
 	ApplicationCreated
 	AuthenticationSucceededOnApplication
 	InstanceDeleted
+	CustomInstanceDomainConfigured
+
+	IDPCreated
+	IDPActivated
+	IDPLinked
+	IDPSignIn
+
+	BrandingConfigured
+	BrandingActivated
+
+	SMTPConfigured
+
+	B2BOrgCreated
+	B2BProjectGranted
+	B2BUserGranted
 
 	typesCount
 )
@@ -40,20 +55,16 @@ func (t *Type) UnmarshalJSON(data []byte) error {
 }
 
 func typeFromString(t string) Type {
-	switch t {
-	case InstanceCreated.String():
-		return InstanceCreated
-	case AuthenticationSucceededOnInstance.String():
-		return AuthenticationSucceededOnInstance
-	case ProjectCreated.String():
-		return ProjectCreated
-	case ApplicationCreated.String():
-		return ApplicationCreated
-	case AuthenticationSucceededOnApplication.String():
-		return AuthenticationSucceededOnApplication
-	case InstanceDeleted.String():
-		return InstanceDeleted
-	default:
+	idx := strings.Index(_Type_name, t)
+	if idx <= 0 {
 		return unknown
 	}
+
+	for i, typeIdx := range _Type_index {
+		if int(typeIdx) != idx {
+			continue
+		}
+		return Type(i)
+	}
+	return unknown
 }

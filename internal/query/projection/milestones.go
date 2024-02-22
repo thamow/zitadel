@@ -10,8 +10,11 @@ import (
 	"github.com/zitadel/zitadel/internal/eventstore/handler/v2"
 	"github.com/zitadel/zitadel/internal/repository/instance"
 	"github.com/zitadel/zitadel/internal/repository/milestone"
+	"github.com/zitadel/zitadel/internal/repository/org"
 	"github.com/zitadel/zitadel/internal/repository/project"
 	"github.com/zitadel/zitadel/internal/repository/user"
+	"github.com/zitadel/zitadel/internal/repository/usergrant"
+	"github.com/zitadel/zitadel/internal/zerrors"
 )
 
 const (
@@ -70,6 +73,78 @@ func (p *milestoneProjection) Reducers() []handler.AggregateReducer {
 					Event:  instance.InstanceRemovedEventType,
 					Reduce: p.reduceInstanceRemoved,
 				},
+				{
+					Event:  instance.IDPConfigAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.OAuthIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.OIDCIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.JWTIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.AzureADIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitHubIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitHubEnterpriseIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitLabIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitLabSelfHostedIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GoogleIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.LDAPIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.AppleIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.SAMLIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.LoginPolicyIDPProviderAddedEventType,
+					Reduce: p.reduceIDPActivated,
+				},
+				{
+					Event:  instance.LabelPolicyAddedEventType,
+					Reduce: p.reduceBrandingConfigured,
+				},
+				{
+					Event:  instance.LabelPolicyActivatedEventType,
+					Reduce: p.reduceBrandingActivated,
+				},
+				{
+					Event:  instance.SMTPConfigAddedEventType,
+					Reduce: p.reduceSMTPConfigured,
+				},
+				{
+					Event:  instance.InstanceDomainAddedEventType,
+					Reduce: p.reduceCustomInstanceDomainConfigured,
+				},
 			},
 		},
 		{
@@ -91,6 +166,10 @@ func (p *milestoneProjection) Reducers() []handler.AggregateReducer {
 					Event:  project.APIConfigAddedType,
 					Reduce: p.reduceAPIConfigAdded,
 				},
+				{
+					Event:  project.GrantAddedType,
+					Reduce: p.reduceProjectGranted,
+				},
 			},
 		},
 		{
@@ -102,6 +181,14 @@ func (p *milestoneProjection) Reducers() []handler.AggregateReducer {
 					Event:  user.UserTokenAddedType,
 					Reduce: p.reduceUserTokenAdded,
 				},
+				{
+					Event:  user.UserIDPLinkAddedType,
+					Reduce: p.reduceIDPLinked,
+				},
+				{
+					Event:  user.UserIDPLoginCheckSucceededType,
+					Reduce: p.reduceIDPSignedIn,
+				},
 			},
 		},
 		{
@@ -110,6 +197,88 @@ func (p *milestoneProjection) Reducers() []handler.AggregateReducer {
 				{
 					Event:  milestone.PushedEventType,
 					Reduce: p.reduceMilestonePushed,
+				},
+			},
+		},
+		{
+			Aggregate: org.AggregateType,
+			EventReducers: []handler.EventReducer{
+				{
+					Event:  instance.IDPConfigAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.OAuthIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.OIDCIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.JWTIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.AzureADIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitHubIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitHubEnterpriseIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitLabIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GitLabSelfHostedIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.GoogleIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.LDAPIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.AppleIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.SAMLIDPAddedEventType,
+					Reduce: p.reduceIDPAdded,
+				},
+				{
+					Event:  instance.LoginPolicyIDPProviderAddedEventType,
+					Reduce: p.reduceIDPActivated,
+				},
+				{
+					Event:  org.LabelPolicyAddedEventType,
+					Reduce: p.reduceBrandingConfigured,
+				},
+				{
+					Event:  org.LabelPolicyActivatedEventType,
+					Reduce: p.reduceBrandingActivated,
+				},
+				{
+					Event:  org.OrgAddedEventType,
+					Reduce: p.reduceOrgAdded,
+				},
+			},
+		},
+		{
+			Aggregate: usergrant.AggregateType,
+			EventReducers: []handler.EventReducer{
+				{
+					Event:  usergrant.UserGrantAddedType,
+					Reduce: p.reduceUserGrantAdded,
 				},
 			},
 		},
@@ -288,6 +457,118 @@ func (p *milestoneProjection) reduceAppConfigAdded(event eventstore.Event, clien
 	), nil
 }
 
+func (p *milestoneProjection) reduceIDPAdded(event eventstore.Event) (*handler.Statement, error) {
+	if !p.isIDPAddedEvent(event) {
+		return nil, zerrors.ThrowInvalidArgumentf(nil, "HANDL-MMcfA", "reduce.wrong.event.type %T", event)
+	}
+	return p.reduceReachedFunc(milestone.IDPCreated)(event)
+}
+
+func (p *milestoneProjection) reduceIDPActivated(event eventstore.Event) (*handler.Statement, error) {
+	switch event.(type) {
+	case *instance.IdentityProviderAddedEvent,
+		*org.IdentityProviderAddedEvent:
+		// correct event
+	default:
+		return nil, zerrors.ThrowInvalidArgumentf(nil, "HANDL-rpxwR", "reduce.wrong.event.type %T", event)
+	}
+	return p.reduceReachedFunc(milestone.IDPActivated)(event)
+}
+
+func (p *milestoneProjection) reduceIDPLinked(event eventstore.Event) (*handler.Statement, error) {
+	if _, ok := event.(*user.UserIDPLinkAddedEvent); !ok {
+		return nil, zerrors.ThrowInvalidArgumentf(nil, "HANDL-ZfnV3", "reduce.wrong.event.type %T", event)
+	}
+	return p.reduceReachedFunc(milestone.IDPLinked)(event)
+}
+
+func (p *milestoneProjection) reduceIDPSignedIn(event eventstore.Event) (*handler.Statement, error) {
+	if _, ok := event.(*user.UserIDPCheckSucceededEvent); !ok {
+		return nil, zerrors.ThrowInvalidArgumentf(nil, "HANDL-HKXGZ", "reduce.wrong.event.type %T", event)
+	}
+	return p.reduceReachedFunc(milestone.IDPSignIn)(event)
+}
+
+func (p *milestoneProjection) reduceBrandingConfigured(event eventstore.Event) (*handler.Statement, error) {
+	if p.isSystemEvent(event) {
+		return handler.NewNoOpStatement(event), nil
+	}
+	switch event.(type) {
+	case *instance.LabelPolicyAddedEvent,
+		*org.LabelPolicyAddedEvent:
+		// correct event
+	default:
+		return nil, zerrors.ThrowInvalidArgumentf(nil, "HANDL-z90Kj", "reduce.wrong.event.type %T", event)
+	}
+
+	return p.reduceReachedFunc(milestone.BrandingConfigured)(event)
+}
+
+func (p *milestoneProjection) reduceBrandingActivated(event eventstore.Event) (*handler.Statement, error) {
+	if p.isSystemEvent(event) {
+		return handler.NewNoOpStatement(event), nil
+	}
+	switch event.(type) {
+	case *instance.LabelPolicyActivatedEvent,
+		*org.LabelPolicyActivatedEvent:
+		// correct event
+	default:
+		return nil, zerrors.ThrowInvalidArgumentf(nil, "HANDL-z90Kj", "reduce.wrong.event.type %T", event)
+	}
+
+	return p.reduceReachedFunc(milestone.BrandingActivated)(event)
+}
+
+func (p *milestoneProjection) reduceSMTPConfigured(event eventstore.Event) (*handler.Statement, error) {
+	e, err := assertEvent[*instance.SMTPConfigAddedEvent](event)
+	if err != nil {
+		return nil, err
+	}
+	if p.isSystemEvent(e) {
+		return handler.NewNoOpStatement(event), nil
+	}
+
+	return p.reduceReachedFunc(milestone.SMTPConfigured)(event)
+}
+
+func (p *milestoneProjection) reduceCustomInstanceDomainConfigured(event eventstore.Event) (*handler.Statement, error) {
+	e, err := assertEvent[*instance.DomainAddedEvent](event)
+	if err != nil {
+		return nil, err
+	}
+	if e.Generated {
+		return handler.NewNoOpStatement(e), nil
+	}
+	return p.reduceReachedFunc(milestone.CustomInstanceDomainConfigured)(e)
+}
+
+func (p *milestoneProjection) reduceProjectGranted(event eventstore.Event) (*handler.Statement, error) {
+	e, err := assertEvent[*project.GrantAddedEvent](event)
+	if err != nil {
+		return nil, err
+	}
+	return p.reduceReachedFunc(milestone.B2BProjectGranted)(e)
+}
+
+func (p *milestoneProjection) reduceOrgAdded(event eventstore.Event) (*handler.Statement, error) {
+	e, err := assertEvent[*org.OrgAddedEvent](event)
+	if err != nil {
+		return nil, err
+	}
+	if p.isSystemEvent(e) {
+		return handler.NewNoOpStatement(e), nil
+	}
+	return p.reduceReachedFunc(milestone.B2BOrgCreated)(e)
+}
+
+func (p *milestoneProjection) reduceUserGrantAdded(event eventstore.Event) (*handler.Statement, error) {
+	e, err := assertEvent[*usergrant.UserGrantAddedEvent](event)
+	if err != nil {
+		return nil, err
+	}
+	return p.reduceReachedFunc(milestone.B2BUserGranted)(e)
+}
+
 func (p *milestoneProjection) isSystemEvent(event eventstore.Event) bool {
 	if userId, err := strconv.Atoi(event.Creator()); err == nil && userId > 0 {
 		return false
@@ -302,4 +583,80 @@ func (p *milestoneProjection) isSystemEvent(event eventstore.Event) bool {
 
 	_, ok := p.systemUsers[event.Creator()]
 	return ok
+}
+
+func (p *milestoneProjection) isIDPAddedEvent(event eventstore.Event) bool {
+	switch event.(type) {
+	case *instance.IDPConfigAddedEvent,
+		*instance.OAuthIDPAddedEvent,
+		*instance.OIDCIDPAddedEvent,
+		*instance.JWTIDPAddedEvent,
+		*instance.AzureADIDPAddedEvent,
+		*instance.GitHubIDPAddedEvent,
+		*instance.GitHubEnterpriseIDPAddedEvent,
+		*instance.GitLabIDPAddedEvent,
+		*instance.GitLabSelfHostedIDPAddedEvent,
+		*instance.GoogleIDPAddedEvent,
+		*instance.LDAPIDPAddedEvent,
+		*instance.AppleIDPAddedEvent,
+		*instance.SAMLIDPAddedEvent:
+		return true
+	}
+
+	return false
+}
+
+func (p *milestoneProjection) isIDPActivatedEvent(event eventstore.Event) bool {
+	switch event.(type) {
+	case *instance.IDPConfigAddedEvent,
+		*instance.OAuthIDPAddedEvent,
+		*instance.OIDCIDPAddedEvent,
+		*instance.JWTIDPAddedEvent,
+		*instance.AzureADIDPAddedEvent,
+		*instance.GitHubIDPAddedEvent,
+		*instance.GitHubEnterpriseIDPAddedEvent,
+		*instance.GitLabIDPAddedEvent,
+		*instance.GitLabSelfHostedIDPAddedEvent,
+		*instance.GoogleIDPAddedEvent,
+		*instance.LDAPIDPAddedEvent,
+		*instance.AppleIDPAddedEvent,
+		*instance.SAMLIDPAddedEvent:
+		return true
+	}
+
+	return false
+}
+
+func (p *milestoneProjection) isIDPSignInEvent(event eventstore.Event) bool {
+	switch event.(type) {
+	case *instance.IDPConfigAddedEvent,
+		*instance.OAuthIDPAddedEvent,
+		*instance.OIDCIDPAddedEvent,
+		*instance.JWTIDPAddedEvent,
+		*instance.AzureADIDPAddedEvent,
+		*instance.GitHubIDPAddedEvent,
+		*instance.GitHubEnterpriseIDPAddedEvent,
+		*instance.GitLabIDPAddedEvent,
+		*instance.GitLabSelfHostedIDPAddedEvent,
+		*instance.GoogleIDPAddedEvent,
+		*instance.LDAPIDPAddedEvent,
+		*instance.AppleIDPAddedEvent,
+		*instance.SAMLIDPAddedEvent,
+		*org.IDPConfigAddedEvent,
+		*org.OAuthIDPAddedEvent,
+		*org.OIDCIDPAddedEvent,
+		*org.JWTIDPAddedEvent,
+		*org.AzureADIDPAddedEvent,
+		*org.GitHubIDPAddedEvent,
+		*org.GitHubEnterpriseIDPAddedEvent,
+		*org.GitLabIDPAddedEvent,
+		*org.GitLabSelfHostedIDPAddedEvent,
+		*org.GoogleIDPAddedEvent,
+		*org.LDAPIDPAddedEvent,
+		*org.AppleIDPAddedEvent,
+		*org.SAMLIDPAddedEvent:
+		return true
+	}
+
+	return false
 }

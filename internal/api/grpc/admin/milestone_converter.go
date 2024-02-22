@@ -93,6 +93,28 @@ func modelMilestoneTypeToPb(t milestone.Type) milestone_pb.MilestoneType {
 		return milestone_pb.MilestoneType_MILESTONE_TYPE_AUTHENTICATION_SUCCEEDED_ON_APPLICATION
 	case milestone.InstanceDeleted:
 		return milestone_pb.MilestoneType_MILESTONE_TYPE_INSTANCE_DELETED
+	case milestone.CustomInstanceDomainConfigured:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_CUSTOM_INSTANCE_DOMAIN_SET
+	case milestone.IDPCreated:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_IDP_ADDED
+	case milestone.IDPActivated:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_IDP_ACTIVATED
+	case milestone.IDPLinked:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_IDP_LINKED
+	case milestone.IDPSignIn:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_IDP_SIGNED_IN
+	case milestone.BrandingConfigured:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_BRANDING_CONFIGURED
+	case milestone.BrandingActivated:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_BRANDING_ACTIVATED
+	case milestone.SMTPConfigured:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_SMTP_CONFIGURED
+	case milestone.B2BOrgCreated:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_B2B_ORG_CREATED
+	case milestone.B2BProjectGranted:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_PROJECT_CREATED
+	case milestone.B2BUserGranted:
+		return milestone_pb.MilestoneType_MILESTONE_TYPE_B2B_USER_GRANTED
 	default:
 		return milestone_pb.MilestoneType_MILESTONE_TYPE_UNSPECIFIED
 	}
