@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	MilestonesProjectionTable = "projections.milestones"
+	MilestonesProjectionTable = "projections.milestones2"
 
 	MilestoneColumnInstanceID      = "instance_id"
 	MilestoneColumnType            = "type"
